@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriDetect - Plant Disease Detection & Advisory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-dark: #1b5e20;
+            --secondary: #ff9800;
+            --light: #f5f5f5;
+            --dark: #333;
+            --gray: #757575;
+            --danger: #d32f2f;
+            --success: #388e3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--primary);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(46, 125, 50, 0.9), rgba(46, 125, 50, 0.8)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1632&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .btn-hero {
+            background: var(--secondary);
+            color: white;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--primary-dark);
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Upload Section */
+        .upload-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 50px;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+        }
+
+        .upload-area h3 {
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .analyze-btn {
+            display: none;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Results Section */
+        .results-container {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .disease-name {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+        }
+
+        .confidence {
+            background: var(--primary-light);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .result-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .result-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .result-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+        }
+
+        .result-card h3 i {
+            color: var(--primary);
+        }
+
+        .treatment-list, .prevention-list {
+            list-style-type: none;
+        }
+
+        .treatment-list li, .prevention-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .treatment-list li:last-child, .prevention-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Knowledge Library */
+        .knowledge-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+
+        .search-bar {
+            display: flex;
+            margin-bottom: 30px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            font-size: 1rem;
+        }
+
+        .search-bar button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .disease-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .disease-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .disease-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .disease-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .disease-info {
+            padding: 15px;
+        }
+
+        .disease-info h3 {
+            margin-bottom: 10px;
+            color: var(--primary-dark);
+        }
+
+        .disease-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .read-more {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* History Section */
+        .history-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th, .history-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-table th {
+            background-color: #f5f5f5;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .history-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status.healthy {
+            background: #e8f5e9;
+            color: var(--success);
+        }
+
+        .status.diseased {
+            background: #ffebee;
+            color: var(--danger);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-dark);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--secondary);
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .social-links a:hover {
+            background: var(--primary-light);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .result-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                gap: 15px;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .disease-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .auth-buttons .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Loading Animation */
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .loader-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-leaf"></i>
+                    <h1>AgriDetect</h1>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="active">Home</a></li>
+                        <li><a href="#detect">Disease Detection</a></li>
+                        <li><a href="#knowledge">Knowledge Library</a></li>
+                        <li><a href="#history">History</a></li>
+                        <li><a href="#about">About</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons">
+                    <button class="btn btn-outline">Login</button>
+                    <button class="btn btn-primary">Register</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>AI-Powered Plant Disease Detection</h2>
+            <p>Upload a photo of your plant leaves and get instant diagnosis with treatment recommendations. Protect your crops with our advanced AI technology.</p>
+            <button class="btn btn-hero">Get Started <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container main-content">
+        <!-- Disease Detection Section -->
+        <section id="detect">
+            <div class="section-title">
+                <h2>Detect Plant Diseases</h2>
+                <p>Upload an image of your plant leaves to identify diseases and get treatment recommendations</p>
+            </div>
+
+            <div class="upload-container">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Upload Plant Leaf Image</h3>
+                    <p>Drag & drop your image here or click to browse</p>
+                    <p class="small">Supported formats: JPG, PNG, JPEG (Max 5MB)</p>
+                    <input type="file" id="fileInput" class="file-input" accept="image/*">
+                </div>
+
+                <div class="preview-container" id="previewContainer">
+                    <img src="" alt="Preview" class="preview-image" id="previewImage">
+                    <button class="btn btn-primary analyze-btn" id="analyzeBtn">Analyze Image</button>
+                </div>
+
+                <div class="loader" id="loader">
+                    <div class="loader-spinner"></div>
+                    <p>Analyzing your image with AI...</p>
+                </div>
+            </div>
+
+            <div class="results-container" id="resultsContainer">
+                <div class="result-header">
+                    <h2 class="disease-name" id="diseaseName">Tomato Early Blight</h2>
+                    <div class="confidence" id="confidence">94% Confidence</div>
+                </div>
+                
+                <div class="result-content">
+                    <div class="result-card">
+                        <h3><i class="fas fa-info-circle"></i> Disease Information</h3>
+                        <p id="diseaseInfo">Early blight is a common fungal disease that affects tomatoes, potatoes, and other plants. It is caused by the fungus Alternaria solani and typically appears as concentric rings on leaves, resembling a target.</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3><i class="fas fa-prescription-bottle"></i> Recommended Treatment</h3>
+                        <ul class="treatment-list" id="treatmentList">
+                            <li>Apply copper-based fungicides every 7-10 days</li>
+                            <li>Remove and destroy infected plant parts</li>
+                            <li>Use chlorothalonil or mancozeb fungicides</li>
+                            <li>Apply neem oil as an organic alternative</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3><i class="fas fa-shield-alt"></i> Prevention Tips</h3>
+                        <ul class="prevention-list" id="preventionList">
+                            <li>Practice crop rotation (3-4 year cycle)</li>
+                            <li>Ensure proper plant spacing for air circulation</li>
+                            <li>Water at the base, avoid overhead irrigation</li>
+                            <li>Use disease-resistant varieties when possible</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3><i class="fas fa-seedling"></i> Best Practices</h3>
+                        <ul class="prevention-list" id="bestPractices">
+                            <li>Monitor plants regularly for early signs</li>
+                            <li>Maintain soil fertility with balanced fertilization</li>
+                            <li>Remove plant debris at the end of the season</li>
+                            <li>Use mulch to prevent soil splashing onto leaves</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Library Section -->
+        <section id="knowledge">
+            <div class="section-title">
+                <h2>Plant Disease Knowledge Library</h2>
+                <p>Browse common plant diseases, symptoms, and treatment methods</p>
+            </div>
+
+            <div class="knowledge-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search for plant diseases...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+
+                <div class="disease-grid">
+                    <div class="disease-card">
+                        <div class="disease-image" style="background-image: url('https://images.unsplash.com/photo-1597848212624-e6d4bd7e1e92?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80');"></div>
+                        <div class="disease-info">
+                            <h3>Tomato Late Blight</h3>
+                            <p>A destructive disease caused by Phytophthora infestans that can quickly destroy entire tomato crops.</p>
+                            <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div class="disease-card">
+                        <div class="disease-image" style="background-image: url('https://images.unsplash.com/photo-1594652635994-3f413831d934?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80');"></div>
+                        <div class="disease-info">
+                            <h3>Powdery Mildew</h3>
+                            <p>A common fungal disease that appears as white powdery spots on leaves and stems of various plants.</p>
+                            <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div class="disease-card">
+                        <div class="disease-image" style="background-image: url('https://images.unsplash.com/photo-1578656303072-6d4c527d1e6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80');"></div>
+                        <div class="disease-info">
+                            <h3>Leaf Spot Disease</h3>
+                            <p>Various fungal and bacterial diseases that cause spots on leaves, potentially leading to defoliation.</p>
+                            <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history">
+            <div class="section-title">
+                <h2>Diagnosis History</h2>
+                <p>View your previous plant disease diagnoses and results</p>
+            </div>
+
+            <div class="history-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Plant Type</th>
+                            <th>Diagnosis</th>
+                            <th>Confidence</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2023-06-15</td>
+                            <td>Tomato</td>
+                            <td>Early Blight</td>
+                            <td>94%</td>
+                            <td><span class="status diseased">Diseased</span></td>
+                            <td><a href="#">View Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>2023-06-10</td>
+                            <td>Corn</td>
+                            <td>Healthy</td>
+                            <td>98%</td>
+                            <td><span class="status healthy">Healthy</span></td>
+                            <td><a href="#">View Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>2023-06-05</td>
+                            <td>Potato</td>
+                            <td>Late Blight</td>
+                            <td>89%</td>
+                            <td><span class="status diseased">Diseased</span></td>
+                            <td><a href="#">View Details</a></td>
+                        </tr>
+                        <tr>
+                            <td>2023-05-28</td>
+                            <td>Tomato</td>
+                            <td>Powdery Mildew</td>
+                            <td>92%</td>
+                            <td><span class="status diseased">Diseased</span></td>
+                            <td><a href="#">View Details</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AgriDetect</h3>
+                    <p>AI-powered plant disease detection and advisory system for farmers and agricultural professionals.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#detect">Disease Detection</a></li>
+                        <li><a href="#knowledge">Knowledge Library</a></li>
+                        <li><a href="#history">Diagnosis History</a></li>
+                        <li><a href="#about">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Agricultural Best Practices</a></li>
+                        <li><a href="#">Seasonal Planting Guide</a></li>
+                        <li><a href="#">Pesticide Recommendations</a></li>
+                        <li><a href="#">Organic Farming Methods</a></li>
+                        <li><a href="#">Government Schemes</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Farm Road, Agriculture City</li>
+                        <li><i class="fas fa-phone"></i> +1 234 567 8900</li>
+                        <li><i class="fas fa-envelope"></i> info@agridetect.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 AgriDetect. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loader = document.getElementById('loader');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const diseaseName = document.getElementById('diseaseName');
+        const confidence = document.getElementById('confidence');
+        const diseaseInfo = document.getElementById('diseaseInfo');
+        const treatmentList = document.getElementById('treatmentList');
+        const preventionList = document.getElementById('preventionList');
+        const bestPractices = document.getElementById('bestPractices');
+
+        // Event Listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelection(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+        
+        analyzeBtn.addEventListener('click', analyzeImage);
+
+        // Functions
+        function handleFileSelection(file) {
+            // Check if file is an image
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file (JPG, PNG, JPEG)');
+                return;
+            }
+            
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size exceeds 5MB limit. Please choose a smaller image.');
+                return;
+            }
+            
+            // Display preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                analyzeBtn.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+       function analyzeImage() {
+    if (!fileInput.files.length) {
+        alert("Please select an image first.");
+        return;
+    }
+
+    loader.style.display = 'block';
+    analyzeBtn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+
+    fetch('/api/detect/', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Server error");
+        }
+        return response.json();
+    })
+    .then(data => {
+        loader.style.display = 'none';
+
+        displayResults({
+            disease: data.disease_detected,
+            confidence: (data.confidence * 100).toFixed(2) + "%",
+            info: data.symptoms || data.causes || "No description available.",
+            treatments: data.treatment_advice || ["No treatment info available"],
+            preventions: data.prevention_tips || ["No prevention info available"],
+            practices: [
+                "Monitor crops regularly",
+                "Remove infected plants early",
+                "Use clean farming tools",
+                "Consult an agricultural expert if severe"
+            ]
+        });
+
+        resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        analyzeBtn.disabled = false;
+    })
+    .catch(err => {
+        console.error(err);
+        loader.style.display = 'none';
+        analyzeBtn.disabled = false;
+        alert("Failed to analyze image. Check server is running.");
+    });
+}
+
+
+        function displayResults(data) {
+            diseaseName.textContent = data.disease;
+            confidence.textContent = data.confidence + " Confidence";
+            diseaseInfo.textContent = data.info;
+            
+            // Clear previous lists
+            treatmentList.innerHTML = '';
+            preventionList.innerHTML = '';
+            bestPractices.innerHTML = '';
+            
+            // Populate treatment list
+            data.treatments.forEach(treatment => {
+                const li = document.createElement('li');
+                li.textContent = treatment;
+                treatmentList.appendChild(li);
+            });
+            
+            // Populate prevention list
+            data.preventions.forEach(prevention => {
+                const li = document.createElement('li');
+                li.textContent = prevention;
+                preventionList.appendChild(li);
+            });
+            
+            // Populate best practices list
+            data.practices.forEach(practice => {
+                const li = document.createElement('li');
+                li.textContent = practice;
+                bestPractices.appendChild(li);
+            });
+            
+            // Show results container
+            resultsContainer.style.display = 'block';
+            analyzeBtn.disabled = false;
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId !== '#') {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
